@@ -1,8 +1,8 @@
-import { uploadFile } from "../config/s3.js";
+import { getAwsFiles, uploadAwsFile, getOneUrlAwsFile, externalServicesDownloadFile } from "../config/s3.js";
 
 export const createFiles= async ( req,res) => {
   try {
-    const result = await uploadFile(req.files.file)
+    const result = await uploadAwsFile(req.files.file)
     return res.status(200).json({ result })
 
   } catch (error) {
@@ -14,7 +14,8 @@ export const createFiles= async ( req,res) => {
 export const getFiles = async ( req,res) => {
 
   try {
-     return res.status(200).json({ msg: "getFiles "})
+     const result = await getAwsFiles()
+     return res.status(200).json(result.Contents)
 
   } catch (error) {
     console.log(error);
@@ -22,11 +23,24 @@ export const getFiles = async ( req,res) => {
   }
 }
 
-export const getOneFiles = async( req,res) => {
- 
+export const getOneFile = async( req,res) => {
+  const {filename} = req.params
   try {
-  
-    return res.status(200).json({ msg: "get one Files "})    
+    const result = await getOneUrlAwsFile(filename)
+    return res.status(200).json(result.$metadata)    
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({error: "sever error"})
+  }
+}
+
+export const downloadFile = async( req,res) => {
+  const {filename} = req.params
+  console.log(filename);
+  try {
+    const result = await externalServicesDownloadFile(filename)
+    return res.status(200).json({message:"file dwonload"})    
 
   } catch (error) {
     console.log(error);
